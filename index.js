@@ -26,37 +26,6 @@ const uri = `mongodb+srv://online-tutor:${p}@cluster0.s9hhkxb.mongodb.net/?retry
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-//=========================================Studentn Database Connection===============================================
-client.connect(err => {
-  console.log("Database Connected Successfully")
-  const studentdb = client.db("online-tutor").collection("Student");
-  
-
-  //Register New -- POST Method----------------------------------
-   app.post("/newUser/student",  (req, res)=>{
-     const newUser = req.body;
-    console.log("New User DAta",newUser)
-    studentdb.insertOne(newUser)
-     res.send(newUser);
-  })
-
-  //GET Student Login DB--------------------------
-  app.get("/studentdb",  (req, res)=>{
-    studentdb.find({})
-    .toArray((err, document)=>{
-      res.send(document);
-    })
-  })
-  //GET Student DB--------Admin---------------------------
-  app.get("/allstudentdb", (req, res)=>{
-    studentdb.find({})
-    .toArray((err, document)=>{
-      res.send(document);
-    })
-
-
-  })
-})
 // ==========================================Public Posts Database Connection=============================================================
 client.connect(err=>{
   const postsdb = client.db("online-tutor").collection("post");
@@ -71,11 +40,55 @@ client.connect(err=>{
   })
 })
 
+//=========================================Studentn Database Connection===============================================
+client.connect(err => {
+  console.log("Students Database Connected Successfully")
+  const studentdb = client.db("online-tutor").collection("Student");
+  
+
+  //Register New -- POST Method----------------------------------
+   app.post("/newUser/student",  (req, res)=>{
+     const newUser = req.body;
+    console.log("New User DAta",newUser)
+    studentdb.insertOne(newUser)
+     res.send(newUser);
+  })
+
+  //POST  Student Login DB--------------------------
+  app.post("/login/student",  (req, res)=>{
+    const User = req.body;
+    studentdb.find(User)
+    .toArray((err, document)=>{
+      res.send(document);
+      console.log("Documents ", document)
+    })
+  })
+  //GET Student DB--------Admin---------------------------
+  app.get("/allstudentdb", (req, res)=>{
+    studentdb.find({})
+    .toArray((err, document)=>{
+      res.send(document);
+      
+    })
+
+
+  })
+})
+
 // =========================================Tutors Database Connection===============================================================----
 client.connect(err=>{
   console.log("Tutors Database connected")
   const tutordb = client.db("online-tutor").collection("Tutor");
 
+  //POST  Student Login DB--------------------------
+  app.post("/login/tutor",  (req, res)=>{
+    const User = req.body;
+    tutordb.find(User)
+    .toArray((err, document)=>{
+      res.send(document);
+      console.log("Documents ", document)
+    })
+  })
     //GET Tutor  DB---------Admin--------------------------
     app.get("/alltutordb", (req, res)=>{
       tutordb.find({})

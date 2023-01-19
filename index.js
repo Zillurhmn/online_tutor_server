@@ -35,7 +35,9 @@ client.connect(err=>{
     console.log("Getting posts db")
     postsdb.find({})
     .toArray((err, document)=>{
+      console.log(req.body.state)
       res.send(document);
+      console.log("send All posts db",document)
     })
   })
 })

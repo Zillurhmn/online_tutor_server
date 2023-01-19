@@ -3,6 +3,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const BodyParser = require('body-parser')
 const cors = require('cors')
 const ObjectId = require('mongodb').ObjectId;
+
 const corsOptions ={
   origin:'*', 
   credentials:true,            //access-control-allow-credentials:true
@@ -14,7 +15,7 @@ const app = express()
 
 app.use(BodyParser.urlencoded({ extended: false }));
 app.use(BodyParser.json());
-app.use(cors(corsOptions))
+app.use(cors())
 
 //Password
 const p = "xlUo2U1F3zr2GQC6"
@@ -23,53 +24,78 @@ const uri = `mongodb+srv://online-tutor:${p}@cluster0.s9hhkxb.mongodb.net/?retry
 //DataBase Connection with MongoDB
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+//=========================================Studentn Database Connection===============================================
 client.connect(err => {
   console.log("Database Connected Successfully")
   const studentdb = client.db("online-tutor").collection("Student");
-  const tutordb = client.db("online-tutor").collection("Tutor");
-  const postsdb = client.db("online-tutor").collection("post");
+  
 
-   //Register New -- POST Method----------------------------------
-   app.post("/newUser", async (req, res)=>{
+  //Register New -- POST Method----------------------------------
+   app.post("/newUser/student",  (req, res)=>{
     console.log("waiting for post req")
      const newUser = req.body;
     console.log("New User DAta",newUser)
+    
     console.log(newUser)
-    await res.send(newUser);
+     res.send(newUser);
   })
 
   //GET Student Login DB--------------------------
-  app.get("/allstudentdb", async (req, res)=>{
+  app.get("/studentdb",  (req, res)=>{
     studentdb.find({})
     .toArray((err, document)=>{
       res.send(document);
     })
   })
   //GET Student DB--------Admin---------------------------
-  app.get("/allstudentdb",async (req, res)=>{
+  app.get("/allstudentdb", (req, res)=>{
     studentdb.find({})
     .toArray((err, document)=>{
       res.send(document);
     })
-  //GET Tutor  DB---------Admin--------------------------
-  app.get("/alltutordb",async (req, res)=>{
-    tutordb.find({})
-    .toArray((err, document)=>{
-      res.send(document);
-    })
+
+
   })
+})
+// ==========================================Public Posts Database Connection=============================================================
+client.connect(err=>{
+  const postsdb = client.db("online-tutor").collection("post");
+  console.log("Publice post Database connected")
   //GET AllPosts  DB----------Public--------------------------
-  app.get("/allpostdb", async(req, res)=>{
+  app.get("/allpostdb", (req, res)=>{
+    console.log("Getting posts db")
     postsdb.find({})
     .toArray((err, document)=>{
       res.send(document);
     })
   })
-
-
-  })
 })
 
+// =========================================Tutors Database Connection===============================================================----
+client.connect(err=>{
+  console.log("Tutors Database connected")
+  const tutordb = client.db("online-tutor").collection("Tutor");
+
+    //GET Tutor  DB---------Admin--------------------------
+    app.get("/alltutordb", (req, res)=>{
+      tutordb.find({})
+      .toArray((err, document)=>{
+        res.send(document);
+      })
+    })
+    //Register New -- -------------POST Method----------------------------------
+   app.post("/newUser/tutor",  (req, res)=>{
+    console.log("waiting for post req")
+     const newUser = req.body;
+    console.log("New User DAta",newUser)
+    
+    console.log(newUser)
+     res.send(newUser);
+  })
+
+})
+// ==================================================================================
 //Server Running at given
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

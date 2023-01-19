@@ -32,16 +32,29 @@ client.connect(err=>{
   console.log("Publice post Database connected")
   //GET AllPosts  DB----------Public--------------------------
   app.get("/allpostdb", (req, res)=>{
+    // const ob={
+    //   tutorId : "63c97ad8827f2d2f86098b0a",
+    //   Name: 'Priyanka Mukharjee' ,
+    //   Subject: 'CSE',
+    //   education: "MSC-City University",
+    //   topicName:"OOP in Java",
+    //   topicDescription: "Provident Topic  Description et in. Quaerat fugiat ut assumenda excepturi exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.",
+    //   amount: "2500/-",
+    //   totalTime: "10hour",
+    //   keyword : "CSE Learning Grammer",
+    //   Review: "412",
+    // }
+    // postsdb.insertOne(ob)
     console.log("Getting posts db")
     postsdb.find({})
     .toArray((err, document)=>{
       res.send(document);
-      console.log("send All posts db",document)
+      // console.log("send All posts db",document)
     })
   })
 })
 
-//=========================================Studentn Database Connection===============================================
+//=========================================Student Database Connection===============================================
 client.connect(err => {
   console.log("Students Database Connected Successfully")
   const studentdb = client.db("online-tutor").collection("Student");
@@ -81,7 +94,7 @@ client.connect(err=>{
   console.log("Tutors Database connected")
   const tutordb = client.db("online-tutor").collection("Tutor");
 
-  //POST  Student Login DB--------------------------
+  //POST  Tutors Login DB--------------------------
   app.post("/login/tutor",  (req, res)=>{
     const User = req.body;
     tutordb.find(User)
@@ -104,7 +117,19 @@ client.connect(err=>{
     tutordb.insertOne(newUser)
      res.send(newUser);
   })
-
+// app.get("/",(req,res)=>{
+//   const ob = {
+//     name: "Priyanka Mukharjee",
+//     email: "priyanka@gmail.com",
+//     password: "123",
+//     user:"tutor",
+//     subject:"CSE",
+//     description:"Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.",
+//     education:"MSC-City University",
+//   }
+//   tutordb.insertOne(ob)
+//   res.send(tutordb)
+// })
 })
 // ==================================================================================
 //Server Running at given

@@ -13,7 +13,8 @@ const corsOptions ={
 const port = 5000
 const app = express()
 
-app.use(BodyParser.urlencoded({ extended: false }));
+// app.use(BodyParser.urlencoded({ extended: true }));
+// app.use(BodyParser.urlencoded());
 app.use(BodyParser.json());
 app.use(cors())
 
@@ -33,11 +34,9 @@ client.connect(err => {
 
   //Register New -- POST Method----------------------------------
    app.post("/newUser/student",  (req, res)=>{
-    console.log("waiting for post req")
      const newUser = req.body;
     console.log("New User DAta",newUser)
-    
-    console.log(newUser)
+    studentdb.insertOne(newUser)
      res.send(newUser);
   })
 
@@ -86,11 +85,9 @@ client.connect(err=>{
     })
     //Register New -- -------------POST Method----------------------------------
    app.post("/newUser/tutor",  (req, res)=>{
-    console.log("waiting for post req")
      const newUser = req.body;
     console.log("New User DAta",newUser)
-    
-    console.log(newUser)
+    tutordb.insertOne(newUser)
      res.send(newUser);
   })
 

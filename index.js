@@ -52,6 +52,8 @@ client.connect(err=>{
       // console.log("send All posts db",document)
     })
   })
+
+
 })
 
 //=========================================Student Database Connection===============================================

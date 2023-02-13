@@ -73,10 +73,15 @@ client.connect(err => {
   //POST  Student Login DB--------------------------
   app.post("/login/student",  (req, res)=>{
     const User = req.body;
+    //finding user details if exist
+    // const trueUser = studentdb.find(User);
+    // res.send(trueUser)
+    // console.log(trueUser)
+    
     studentdb.find(User)
     .toArray((err, document)=>{
       res.send(document);
-      console.log("Documents ", document)
+      console.log("Student login Documents ", document)
     })
   })
   //GET Student DB--------Admin---------------------------
@@ -86,7 +91,6 @@ client.connect(err => {
       res.send(document);
       
     })
-
 
   })
 })
@@ -102,7 +106,7 @@ client.connect(err=>{
     tutordb.find(User)
     .toArray((err, document)=>{
       res.send(document);
-      console.log("Documents ", document)
+      console.log("Tutor Login Documents ", document)
     })
   })
     //GET Tutor  DB---------Admin--------------------------

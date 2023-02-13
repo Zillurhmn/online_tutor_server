@@ -123,6 +123,7 @@ client.connect(err=>{
     tutordb.insertOne(newUser)
      res.send(newUser);
   })
+  
 // app.get("/",(req,res)=>{
 //   const ob = {
 //     name: "Priyanka Mukharjee",

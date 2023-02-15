@@ -56,6 +56,8 @@ client.connect(err=>{
   app.post("/CreatePost",(req,res)=> {
     const newPost = req.body;
     console.log("new post request data", newPost)
+    postsdb.insertOne(newPost)
+    res.send(newPost)
   })
 
 })

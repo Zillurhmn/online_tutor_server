@@ -52,7 +52,11 @@ client.connect(err=>{
       // console.log("send All posts db",document)
     })
   })
-
+  //-------------------------------------Creating New post----------------
+  app.post("/CreatePost",(req,res)=> {
+    const newPost = req.body;
+    console.log("new post request data", newPost)
+  })
 
 })
 

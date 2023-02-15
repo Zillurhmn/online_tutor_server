@@ -46,11 +46,11 @@ client.connect(err=>{
     // }
     // postsdb.insertOne(ob)
     console.log("Getting posts db")
-    postsdb.find({})
-    .toArray((err, document)=>{
-      res.send(document);
-      // console.log("send All posts db",document)
-    })
+    let allpostdb ;
+    postsdb.find({}).toArray().then(data => res.send(data))
+      // res.send(allpostdb);
+      // console.log(allpostdb)
+    
   })
   //-------------------------------------Creating New post----------------
   app.post("/CreatePost",(req,res)=> {

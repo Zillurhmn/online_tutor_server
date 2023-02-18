@@ -5,7 +5,7 @@ const cors = require('cors')
 const ObjectId = require('mongodb').ObjectId;
 const SSLCommerzPayment = require('sslcommerz-lts')
 const env = require('dotenv').config()
-
+const window = require('window')
 const corsOptions ={
   origin:'*', 
   credentials:true,            //access-control-allow-credentials:true
@@ -63,10 +63,10 @@ client.connect(err=>{
         total_amount: 100,
         currency: 'BDT',
         tran_id: 'REF1222223', // use unique tran_id for each api call
-        success_url: 'http://localhost:3000/',
+        success_url: 'http://localhost:5000/init',
         fail_url: 'http://localhost:5000/fail',
         cancel_url: 'http://localhost:5000/cancel',
-        ipn_url: 'http://localhost:5000/ipn',
+        ipn_url: 'localhost:5000/ipn',
         shipping_method: 'Courier',
         product_name: 'Computer.',
         product_category: 'Electronic',
@@ -79,7 +79,7 @@ client.connect(err=>{
         cus_state: 'Dhaka',
         cus_postcode: '1000',
         cus_country: 'Bangladesh',
-        cus_phone: '01711111111',
+        cus_phone: '01867074943',
         cus_fax: '01711111111',
         ship_name: 'Customer Name',
         ship_add1: 'Dhaka',
@@ -95,15 +95,17 @@ client.connect(err=>{
         // Redirect the user to payment gateway
         let GatewayPageURL = apiResponse?.GatewayPageURL;
         res.redirect(GatewayPageURL)
-        console.log('Redirecting to: ', GatewayPageURL)
+        // window.location.replace(GatewayPageURL)
+        // console.log('Redirecting to: ', GatewayPageURL)
     });
   })
 
-  app.post('/success', async (req,res)=>{
-     res.status(200).json({
-      data: req.body,
-    })
-    res.redirect('localhost:5000')
+  app.post('/init', async (req,res)=>{
+    // console.log("success",req.)
+    //  res.status(200).json({
+    //   data: req.body,
+    // })
+    res.redirect('http://localhost:3000')
   })
 })
 

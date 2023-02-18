@@ -3,6 +3,8 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const BodyParser = require('body-parser')
 const cors = require('cors')
 const ObjectId = require('mongodb').ObjectId;
+const SSLCommerzPayment = require('sslcommerz-lts')
+const env = require('dotenv').config()
 
 const corsOptions ={
   origin:'*', 
@@ -18,9 +20,17 @@ const app = express()
 app.use(BodyParser.json());
 app.use(cors())
 
+
 //Password
-const p = "xlUo2U1F3zr2GQC6"
-const uri = `mongodb+srv://online-tutor:${p}@cluster0.s9hhkxb.mongodb.net/?retryWrites=true&w=majority`
+const uri = process.env.URI
+
+
+//----------SSL Info Data Variable----------------
+const store_id = process.env.STORE_ID
+const store_passwd = process.env.STORE_PWD
+const is_live = false //true for live, false for sandbox
+// console.log(store_passwd)
+
 
 //DataBase Connection with MongoDB
 
@@ -32,24 +42,9 @@ client.connect(err=>{
   console.log("Publice post Database connected")
   //GET AllPosts  DB----------Public--------------------------
   app.get("/allpostdb", (req, res)=>{
-    // const ob={
-    //   tutorId : "63c97ad8827f2d2f86098b0a",
-    //   Name: 'Priyanka Mukharjee' ,
-    //   Subject: 'CSE',
-    //   education: "MSC-City University",
-    //   topicName:"OOP in Java",
-    //   topicDescription: "Provident Topic  Description et in. Quaerat fugiat ut assumenda excepturi exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.",
-    //   amount: "2500/-",
-    //   totalTime: "10hour",
-    //   keyword : "CSE Learning Grammer",
-    //   Review: "412",
-    // }
-    // postsdb.insertOne(ob)
     console.log("Getting posts db")
     let allpostdb ;
     postsdb.find({}).toArray().then(data => res.send(data))
-      // res.send(allpostdb);
-      // console.log(allpostdb)
     
   })
   //-------------------------------------Creating New post----------------
@@ -60,6 +55,54 @@ client.connect(err=>{
     res.send(newPost)
   })
 
+  // -----------------------SSL commerz--------------==========================
+
+  //sslcommerz init
+  app.get('/init', (req, res) => {
+    const data = {
+        total_amount: 100,
+        currency: 'BDT',
+        tran_id: 'REF1222223', // use unique tran_id for each api call
+        success_url: 'http://localhost:5000/success',
+        fail_url: 'http://localhost:5000/fail',
+        cancel_url: 'http://localhost:5000/cancel',
+        ipn_url: 'http://localhost:5000/ipn',
+        shipping_method: 'Courier',
+        product_name: 'Computer.',
+        product_category: 'Electronic',
+        product_profile: 'general',
+        cus_name: 'Customer Name',
+        cus_email: 'customer@example.com',
+        cus_add1: 'Dhaka',
+        cus_add2: 'Dhaka',
+        cus_city: 'Dhaka',
+        cus_state: 'Dhaka',
+        cus_postcode: '1000',
+        cus_country: 'Bangladesh',
+        cus_phone: '01711111111',
+        cus_fax: '01711111111',
+        ship_name: 'Customer Name',
+        ship_add1: 'Dhaka',
+        ship_add2: 'Dhaka',
+        ship_city: 'Dhaka',
+        ship_state: 'Dhaka',
+        ship_postcode: 1000,
+        ship_country: 'Bangladesh',
+    };
+    const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+    sslcz.init(data).then(apiResponse => {
+        // Redirect the user to payment gateway
+        let GatewayPageURL = apiResponse?.GatewayPageURL;
+        res.redirect(GatewayPageURL)
+        console.log('Redirecting to: ', GatewayPageURL)
+    });
+  })
+
+  app.post('/success', async (req,res)=>{
+    return res.status(200).json({
+      data: req.body,
+    })
+  })
 })
 
 //=========================================Student Database Connection===============================================
@@ -144,6 +187,12 @@ client.connect(err=>{
 //   res.send(tutordb)
 // })
 })
+
+
+
+
+
+
 // ==================================================================================
 //Server Running at given
 app.listen(port, () => {

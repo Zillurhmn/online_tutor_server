@@ -63,7 +63,7 @@ client.connect(err=>{
         total_amount: 100,
         currency: 'BDT',
         tran_id: 'REF1222223', // use unique tran_id for each api call
-        success_url: 'http://localhost:5000/success',
+        success_url: 'http://localhost:3000/',
         fail_url: 'http://localhost:5000/fail',
         cancel_url: 'http://localhost:5000/cancel',
         ipn_url: 'http://localhost:5000/ipn',
@@ -89,8 +89,9 @@ client.connect(err=>{
         ship_postcode: 1000,
         ship_country: 'Bangladesh',
     };
-    const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
+    const sslcz = new SSLCommerzPayment(store_id, store_passwd, false)
     sslcz.init(data).then(apiResponse => {
+      // console.log("Api is ",apiResponse);
         // Redirect the user to payment gateway
         let GatewayPageURL = apiResponse?.GatewayPageURL;
         res.redirect(GatewayPageURL)
@@ -99,9 +100,10 @@ client.connect(err=>{
   })
 
   app.post('/success', async (req,res)=>{
-    return res.status(200).json({
+     res.status(200).json({
       data: req.body,
     })
+    res.redirect('localhost:5000')
   })
 })
 
@@ -173,19 +175,6 @@ client.connect(err=>{
      res.send(newUser);
   })
   
-// app.get("/",(req,res)=>{
-//   const ob = {
-//     name: "Priyanka Mukharjee",
-//     email: "priyanka@gmail.com",
-//     password: "123",
-//     user:"tutor",
-//     subject:"CSE",
-//     description:"Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.",
-//     education:"MSC-City University",
-//   }
-//   tutordb.insertOne(ob)
-//   res.send(tutordb)
-// })
 })
 
 

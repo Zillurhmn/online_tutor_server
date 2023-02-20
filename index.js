@@ -76,6 +76,19 @@ client.connect(err=>{
     res.send(newPost)
   })
 
+  //=================================Update Tutor's Post-----------------------------------
+  // app.post("/editpost/:id",async(req,res)=> {
+  //   const id= req.params.id;
+  //   const editedPost = req.body;
+  //   console.log(editedPost);
+  //   const newUpdatedPost = {$set :editedPost}
+  //   await postsdb.updateOne({'_id':ObjectId(id)},newUpdatedPost)
+  //   .then(
+  //   result => {
+  //     console.log(result)
+  //     res.send(result) })    
+  // }).catch(err=>console.log("finding related Error",err))
+
   // -----------------------SSL commerz--------------==========================
 
   //sslcommerz init

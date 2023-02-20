@@ -41,12 +41,33 @@ client.connect(err=>{
   const postsdb = client.db("online-tutor").collection("post");
   console.log("Publice post Database connected")
   //GET AllPosts  DB----------Public--------------------------
-  app.get("/allpostdb", (req, res)=>{
+  app.get("/allpostdb",async (req, res)=>{
     console.log("Getting posts db")
     let allpostdb ;
-    postsdb.find({}).toArray().then(data => res.send(data))
+    await postsdb.find({}).toArray().then(data => res.send(data))
     
   })
+  
+  //-------------------------------------Search posts by Id -----------------------
+  app.get("/posts/:id",async(req,res)=>{
+    const id= req.params.id;
+    const arr = await postsdb.find({'tutorId':id}).toArray()
+    // console.log(arr);
+    res.send(arr) 
+    
+  })
+
+  //-------------------------------------Get Delete Post--------------------------
+  app.get("/Deletepost/:id",async(req,res)=>{
+    const id= req.params.id;
+    await postsdb.findOneAndDelete({'_id':ObjectId(id)})
+    .then(
+    result => {
+      console.log(result.value)
+      res.send(result.value) })    
+    
+  })
+
   //-------------------------------------Creating New post----------------
   app.post("/CreatePost",(req,res)=> {
     const newPost = req.body;

@@ -90,23 +90,28 @@ client.connect(err=>{
     .catch(err=>console.log("finding related Error",err))
 
   })
-
+// -----------------------------find Enrollment Id------------------------
+  app.get("/enrollData/:studentId",async(req,res)=>{
+    const queryId= req.params.studentId;
+    const enrolled = await postsdb.find({"enroll": [queryId]}).toArray();
+    res.send(enrolled)
+  })
   // -----------------------SSL commerz--------------==========================
 
   //sslcommerz init
   app.get('/init/:postId/:studentId', async(req, res) => {
     const postId = req.params.postId;
     const studentId = req.params.studentId;
-    // console.log("type  of postId is ",typeof(postId),"type of studentId is ",typeof(studentId));
+    console.log("type  of postId is ",typeof(postId),"type of studentId is ",typeof(studentId));
     let post;
     await postsdb.findOne({'_id': ObjectId(postId)}).then(data=> post = data)
     const success_url = `http://localhost:5000/success/${postId}/${studentId}`
     // console.log(success_url, " type of this is", typeof(success_url))
-    // console.log(typeof(+(post.amount)))
+    // console.log(typeof(`${post._id}`))
     const data = {
         total_amount: +(post.amount),
         currency: 'BDT',
-        tran_id: 'REF21222223', // use unique tran_id for each api call
+        tran_id: `REF12345678`, //  use unique tran_id for each api call
         success_url: (success_url),
         fail_url: 'http://localhost:5000/fail',
         cancel_url: 'http://localhost:5000/cancel',
@@ -143,11 +148,44 @@ client.connect(err=>{
         // console.log('Redirecting to: ', GatewayPageURL)
     });
   })
-
+  //---------sslcommerz success link-----------
   app.post('/success/:postId/:studentId', async (req,res)=>{
     const postId = req.params.postId;
     const studentId = req.params.studentId;
     console.log("postId is ",postId," studentId is ",studentId);
+
+    let post;
+    await postsdb.findOne({'_id': ObjectId(postId)}).then(data=> post = data)
+    console.log(post,"After success")
+    if(post.enroll){
+      //------------if post and enroll found then-------------->
+      console.log("post.enroll  found and-->")
+      const updateDocument = {
+        $push: { "enroll": studentId }
+      };
+
+      await postsdb.updateOne({'_id':ObjectId(postId)},updateDocument)
+      .then(
+      result => {
+        console.log(result,"After Enroll Result")
+      })
+      .catch(err=>console.log("finding related Error",err))
+    }else{
+      //----------------else post.enroll not found then----------->
+      console.log("post.enroll not found and-->")
+      const updateDocument = {
+        $set: { "enroll": [`${studentId}`] }
+      };
+      await postsdb.updateOne({'_id':ObjectId(postId)},updateDocument)
+      .then(
+      result => {
+        console.log(result,"After Enroll Result")
+      })
+      .catch(err=>console.log("finding related Error",err))
+    }
+    
+
+    
     res.redirect('http://localhost:3000')
   })
 })

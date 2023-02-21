@@ -76,7 +76,7 @@ client.connect(err=>{
     res.send(newPost)
   })
 
-  //=================================Update Tutor's Post-----------------------------------
+  //=================================Update Tutor's Post  in PostsDB database-----------------------------------
   app.post("/editpost/:id",async(req,res)=> {
     const id= req.params.id;
     const editedPost = req.body;
@@ -94,12 +94,20 @@ client.connect(err=>{
   // -----------------------SSL commerz--------------==========================
 
   //sslcommerz init
-  app.get('/init', (req, res) => {
+  app.get('/init/:postId/:studentId', async(req, res) => {
+    const postId = req.params.postId;
+    const studentId = req.params.studentId;
+    // console.log("type  of postId is ",typeof(postId),"type of studentId is ",typeof(studentId));
+    let post;
+    await postsdb.findOne({'_id': ObjectId(postId)}).then(data=> post = data)
+    const success_url = `http://localhost:5000/success/${postId}/${studentId}`
+    // console.log(success_url, " type of this is", typeof(success_url))
+    // console.log(typeof(+(post.amount)))
     const data = {
-        total_amount: 100,
+        total_amount: +(post.amount),
         currency: 'BDT',
-        tran_id: 'REF1222223', // use unique tran_id for each api call
-        success_url: 'http://localhost:5000/init',
+        tran_id: 'REF21222223', // use unique tran_id for each api call
+        success_url: (success_url),
         fail_url: 'http://localhost:5000/fail',
         cancel_url: 'http://localhost:5000/cancel',
         ipn_url: 'localhost:5000/ipn',
@@ -136,11 +144,10 @@ client.connect(err=>{
     });
   })
 
-  app.post('/init', async (req,res)=>{
-    // console.log("success",req.)
-    //  res.status(200).json({
-    //   data: req.body,
-    // })
+  app.post('/success/:postId/:studentId', async (req,res)=>{
+    const postId = req.params.postId;
+    const studentId = req.params.studentId;
+    console.log("postId is ",postId," studentId is ",studentId);
     res.redirect('http://localhost:3000')
   })
 })
@@ -162,15 +169,11 @@ client.connect(err => {
   //POST  Student Login DB--------------------------
   app.post("/login/student",  (req, res)=>{
     const User = req.body;
-    //finding user details if exist
-    // const trueUser = studentdb.find(User);
-    // res.send(trueUser)
-    // console.log(trueUser)
-    
-    studentdb.find(User)
-    .toArray((err, document)=>{
-      res.send(document);
-      console.log("Student login Documents ", document)
+   
+    studentdb.findOne(User)
+    .then((data)=>{
+      res.send(data);
+      console.log("Student login Documents ", data)
     })
   })
   //GET Student DB--------Admin---------------------------
@@ -178,10 +181,17 @@ client.connect(err => {
     studentdb.find({})
     .toArray((err, document)=>{
       res.send(document);
-      
     })
-
   })
+
+    //---------------------------Update Students Personal Data-------------------
+    app.get("/editStudentProfile/:id",(req,res)=>{
+      const id = req.params.id;
+      res.send(id)
+  
+    })
+  
+  
 })
 
 // =========================================Tutors Database Connection===============================================================----
@@ -192,8 +202,8 @@ client.connect(err=>{
   //POST  Tutors Login DB--------------------------
   app.post("/login/tutor",  (req, res)=>{
     const User = req.body;
-    tutordb.find(User)
-    .toArray((err, document)=>{
+    tutordb.findOne(User)
+    .then((document)=>{
       res.send(document);
       console.log("Tutor Login Documents ", document)
     })
@@ -212,7 +222,15 @@ client.connect(err=>{
     tutordb.insertOne(newUser)
      res.send(newUser);
   })
-  
+  //---------------------------Update Tutors Personal Data-------------------
+  app.get("/editTutorProfile/:id",(req,res)=>{
+    const id = req.params.id;
+    res.send(id)
+
+  })
+
+
+
 })
 
 

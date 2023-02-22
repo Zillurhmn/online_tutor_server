@@ -93,7 +93,8 @@ client.connect(err=>{
 // -----------------------------find Enrollment Id------------------------
   app.get("/enrollData/:studentId",async(req,res)=>{
     const queryId= req.params.studentId;
-    const enrolled = await postsdb.find({"enroll": [queryId]}).toArray();
+    const enrolled = await postsdb.find({"enroll":{ $elemMatch: {"id":queryId}}}).toArray();
+    console.log("enroll data-->",enrolled)
     res.send(enrolled)
   })
   // -----------------------SSL commerz--------------==========================
@@ -152,16 +153,17 @@ client.connect(err=>{
   app.post('/success/:postId/:studentId', async (req,res)=>{
     const postId = req.params.postId;
     const studentId = req.params.studentId;
-    console.log("postId is ",postId," studentId is ",studentId);
+    // console.log("postId is ",postId," studentId is ",studentId);
 
     let post;
     await postsdb.findOne({'_id': ObjectId(postId)}).then(data=> post = data)
     console.log(post,"After success")
+
     if(post.enroll){
       //------------if post and enroll found then-------------->
       console.log("post.enroll  found and-->")
       const updateDocument = {
-        $push: { "enroll": studentId }
+        $push: { "enroll": {"id":studentId, "review":"","complete":false} }
       };
 
       await postsdb.updateOne({'_id':ObjectId(postId)},updateDocument)
@@ -174,7 +176,7 @@ client.connect(err=>{
       //----------------else post.enroll not found then----------->
       console.log("post.enroll not found and-->")
       const updateDocument = {
-        $set: { "enroll": [`${studentId}`] }
+        $set: { "enroll": [{"id":studentId, "review":"","complete":false}] }
       };
       await postsdb.updateOne({'_id':ObjectId(postId)},updateDocument)
       .then(

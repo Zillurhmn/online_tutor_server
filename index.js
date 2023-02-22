@@ -247,12 +247,18 @@ client.connect(err => {
   })
 
     //---------------------------Update Students Personal Data-------------------
-    app.get("/editStudentProfile/:id",(req,res)=>{
+    app.post("/editStudentProfile/:id",async(req,res)=>{
       const id = req.params.id;
-      res.send(id)
-  
+      const updateDocument = req.body;
+      console.log(updateDocument);
+      const newUpdatedPost = {$set :updateDocument}
+      await studentdb.updateOne({'_id':ObjectId(id)},newUpdatedPost)
+      .then(
+      result => {
+        console.log(result)
+        res.send(result) })
+      .catch(err=>console.log("finding related Error",err))
     })
-  
   
 })
 
@@ -285,15 +291,25 @@ client.connect(err=>{
      res.send(newUser);
   })
   //---------------------------Update Tutors Personal Data-------------------
-  app.get("/editTutorProfile/:id",(req,res)=>{
+  app.post("/editTutorProfile/:id",async(req,res)=>{
     const id = req.params.id;
-    res.send(id)
+    const updateDocument = req.body;
+    console.log(updateDocument);
+    const newUpdatedPost = {$set :updateDocument}
+    await tutordb.updateOne({'_id':ObjectId(id)},newUpdatedPost)
+    .then(
+    result => {
+      console.log(result)
+      res.send(result) })
+    .catch(err=>console.log("finding related Error",err))
+
+
+  })
 
   })
 
 
 
-})
 
 
 

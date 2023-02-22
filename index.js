@@ -94,10 +94,34 @@ client.connect(err=>{
   app.get("/enrollData/:studentId",async(req,res)=>{
     const queryId= req.params.studentId;
     const enrolled = await postsdb.find({"enroll":{ $elemMatch: {"id":queryId}}}).toArray();
-    console.log("enroll data-->",enrolled)
+    // console.log("enroll data-->",enrolled)
     res.send(enrolled)
   })
-  // -----------------------SSL commerz--------------==========================
+
+  //------------------------student review after completing course--------------
+  app.post("/review/:postId/:studentId",async(req,res)=>{
+    const postId= req.params.postId;
+    const queryId= req.params.studentId;
+    const reviewData = req.body;
+    // const query = { "enroll.id": queryId };
+    const updateDocument = {
+      $set: { "enroll.$[aaa]": {...reviewData}}
+    };
+    const filter = {
+      arrayFilters: [{  
+        "aaa.id" : queryId
+      }]
+
+    }
+    const postData = await postsdb.updateOne({"_id":ObjectId(postId), "enroll.id":queryId},updateDocument,filter)
+    // const result = await pizza.updateOne(query, updateDocument);
+    // const result = await postData. 
+    console.log(postData);
+    res.send(postData);
+  })
+
+
+    // -----------------------SSL commerz--------------==========================
 
   //sslcommerz init
   app.get('/init/:postId/:studentId', async(req, res) => {
@@ -185,8 +209,6 @@ client.connect(err=>{
       })
       .catch(err=>console.log("finding related Error",err))
     }
-    
-
     
     res.redirect('http://localhost:3000')
   })

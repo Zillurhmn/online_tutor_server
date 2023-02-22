@@ -307,6 +307,58 @@ client.connect(err=>{
   })
 
   })
+//======================================Chatting Database=============================================
+  client.connect().then(err=>{
+    console.log("Chatting Server connected")
+
+    //--------------DataBase Connecting---------------
+    const tutordb = client.db("online-tutor").collection("Tutor");
+    const studentdb = client.db("online-tutor").collection("Student");
+    const postsdb = client.db("online-tutor").collection("post");
+
+//============Chating start for student===========================================---=-=-=-=-=-=-=-=
+    app.post('/chat/:studentId/:tutorId',async(req,res)=>{
+      const studentId = req.params.studentId;
+      const tutorId = req.params.tutorId;
+      const document= req.body;
+      // res.send(document);
+      let student;
+      await studentdb.findOne({'_id':ObjectId(studentId)}).then(data=> student = data);
+      console.log("Student data from database",student);
+      console.log("objecct data from body",document);
+      if(student.chats){
+        //------------if student and Chats found then-------------->
+        console.log("student.chats  found and-->")
+        const updateDocument = {
+          $push: { "chats": document }
+        };
+
+        await studentdb.updateOne({'_id':ObjectId(studentId)},updateDocument)
+        .then(
+        result => {
+          console.log(result,"After Enroll Result")
+        })
+        .catch(err=>console.log("finding related Error",err))
+      }else{
+              //----------------else Student.enroll not found then----------->
+        console.log("student.chat not found and-->")
+
+        const updateDocument = {
+          $set: { "chats": [{...document}] }
+        };
+        await studentdb.updateOne({'_id':ObjectId(studentId)},updateDocument)
+        .then(
+        result => {
+          console.log(result,"After Enroll Result")
+          
+        })
+        .catch(err=>console.log("finding related Error",err))
+      }
+
+    })
+
+
+  })
 
 
 

@@ -300,7 +300,11 @@ client.connect(err=>{
     .then(
     result => {
       console.log(result)
-      res.send(result) })
+      //If result true then we will give the user data as res.send-----------
+      tutordb.findOne({'_id':ObjectId(id)}).then(data=>
+        res.send(data) 
+        )
+    })
     .catch(err=>console.log("finding related Error",err))
 
 

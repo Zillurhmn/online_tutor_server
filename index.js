@@ -440,9 +440,32 @@ client.connect(err=>{
             res.send(result);
           })
           .catch(err=>console.log("!-> Error",err))
+    })
+    //---------POST tutor new Msg
+    app.post('/chat/tutor/:tutorId/:studentId',async(req,res)=>{
+      const studentId = req.params.studentId;
+      const tutorId = req.params.tutorId;
+      const msgObj = req.body;
+
+      const updateDocument = {
+        $push: { "chats.$[arr].chat": msgObj }
+      };
+      const filter = {
+        arrayFilters: [{  
+            "arr.tutorId" : tutorId
+          }]
+        }
+        await studentdb.updateOne({'_id':ObjectId(studentId), 'chats.tutorId':tutorId},updateDocument,filter)
+        .then(
+          result => {
+            console.log(result," found")
+            res.send(result);
+          })
+          .catch(err=>console.log("!-> Error",err))
+    })
 
 
-  })
+
   })
 
 

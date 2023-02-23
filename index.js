@@ -325,30 +325,57 @@ client.connect(err=>{
       const studentId = req.params.studentId;
       const tutorId = req.params.tutorId;
       const document= req.body;
-      // res.send(document);
-      let student;
+
+      let student,tutor;
+      
       await studentdb.findOne({'_id':ObjectId(studentId)}).then(data=> student = data);
-      console.log("Student data from database",student);
-      console.log("objecct data from body",document);
+      await tutordb.findOne({'_id':ObjectId(tutorId)}).then(data=> tutor = data);
+      // console.log("Student data from database",student);
+      // console.log("objecct data from body",document);
       if(student.chats){
         //------------if student and Chats found then-------------->
         console.log("student.chats  found and-->")
-        const updateDocument = {
-          $push: { "chats": document }
-        };
-
-        await studentdb.updateOne({'_id':ObjectId(studentId)},updateDocument)
-        .then(
-        result => {
-          console.log(result,"After Enroll Result")
-        })
-        .catch(err=>console.log("finding related Error",err))
+        let  chat ;
+        await studentdb.findOne({'_id':ObjectId(studentId), 'chats':{$elemMatch:{'tutorId':tutorId}}})
+        .then(data=> chat = data)  
+        //$in:{'tutorId':tutorId } 
+        if(chat){
+          console.log("chat is true!! ")
+          const updateDocument = {
+            $push: { "chats.$[arr].chat": document }
+          };
+          const filter = {
+            arrayFilters: [{  
+                "arr.tutorId" : tutorId
+              }]
+            }
+            await studentdb.updateOne({'_id':ObjectId(studentId), 'chats.tutorId':tutorId},updateDocument,filter)
+            .then(
+              result => {
+                console.log(result,"tutor Id found")
+              })
+              .catch(err=>console.log("finding related Error",err))
+        }else{
+              
+              console.log("chat is not true!! ",chat)
+              const updateDocument = {
+              $push: { "chats": {'tutorId':tutorId, 'tutorName':(tutor.name) ,'chat':[{...document}]} }
+            };
+            await studentdb.updateOne({'_id':ObjectId(studentId)},updateDocument)
+            .then(
+            result => {
+              console.log(result,"After sending new user msg")
+              
+            })
+            .catch(err=>console.log("finding related Error",err))
+    
+        }
       }else{
               //----------------else Student.enroll not found then----------->
         console.log("student.chat not found and-->")
 
         const updateDocument = {
-          $set: { "chats": [{...document}] }
+          $set: { "chats": [{'tutorId':tutorId, 'tutorName':(tutor.name),'chat':[{...document}]}] }
         };
         await studentdb.updateOne({'_id':ObjectId(studentId)},updateDocument)
         .then(
@@ -360,7 +387,36 @@ client.connect(err=>{
       }
 
     })
+    app.get('/chat/student/:id',async(req,res)=>{
+        const studentId = req.params.id;
+        let student;
+        await studentdb.findOne({'_id':ObjectId(studentId)}).then(data=> student = data);
+        res.send(student.chats || null);
 
+    })
+    app.post('/chat/student/:id/:tutorId',async(req,res)=>{
+        const studentId = req.params.id;
+        const tutorId = req.params.tutorId;
+        const msgObj = req.body;
+
+        const updateDocument = {
+          $push: { "chats.$[arr].chat": msgObj }
+        };
+        const filter = {
+          arrayFilters: [{  
+              "arr.tutorId" : tutorId
+            }]
+          }
+          await studentdb.updateOne({'_id':ObjectId(studentId), 'chats.tutorId':tutorId},updateDocument,filter)
+          .then(
+            result => {
+              console.log(result," found")
+              res.send(result);
+            })
+            .catch(err=>console.log("!-> Error",err))
+
+
+    })
 
   })
 

@@ -359,7 +359,7 @@ client.connect(err=>{
               
               console.log("chat is not true!! ",chat)
               const updateDocument = {
-              $push: { "chats": {'tutorId':tutorId, 'tutorName':(tutor.name) ,'chat':[{...document}]} }
+              $push: { "chats": {'tutorId':tutorId, 'tutorName':(tutor.name) ,'studentId':studentId,"studentName":(student.name),'chat':[{...document}]} }
             };
             await studentdb.updateOne({'_id':ObjectId(studentId)},updateDocument)
             .then(
@@ -375,7 +375,7 @@ client.connect(err=>{
         console.log("student.chat not found and-->")
 
         const updateDocument = {
-          $set: { "chats": [{'tutorId':tutorId, 'tutorName':(tutor.name),'chat':[{...document}]}] }
+          $set: { "chats": [{'tutorId':tutorId, 'studentId':studentId,"studentName":(student.name),'tutorName':(tutor.name),'chat':[{...document}]}] }
         };
         await studentdb.updateOne({'_id':ObjectId(studentId)},updateDocument)
         .then(
@@ -387,6 +387,7 @@ client.connect(err=>{
       }
 
     })
+    //-------------------Get ----Student Chatting Data for Individual Student------------------
     app.get('/chat/student/:id',async(req,res)=>{
         const studentId = req.params.id;
         let student;
@@ -394,30 +395,54 @@ client.connect(err=>{
         res.send(student.chats || null);
 
     })
-    app.post('/chat/student/:id/:tutorId',async(req,res)=>{
-        const studentId = req.params.id;
-        const tutorId = req.params.tutorId;
-        const msgObj = req.body;
+    
+  //-------------------Get ----tutor Chatting Data for Individual tutor (from student database)------------------
 
-        const updateDocument = {
-          $push: { "chats.$[arr].chat": msgObj }
-        };
-        const filter = {
-          arrayFilters: [{  
-              "arr.tutorId" : tutorId
-            }]
+    app.get('/chat/tutor/:id',async(req,res)=>{
+      const tutorId = req.params.id;
+      let studentArr ;
+      await studentdb.find({'chats':{$elemMatch:{'tutorId':tutorId}}})
+      .toArray()
+      .then(data=> studentArr = data)
+
+      //Logical operation
+      let arr = [];
+      studentArr.map(student=>{
+        student.chats.map(tutorsArr=>{
+          if(tutorsArr.tutorId === tutorId){
+            console.log(tutorsArr)
+            arr.push(tutorsArr);
           }
-          await studentdb.updateOne({'_id':ObjectId(studentId), 'chats.tutorId':tutorId},updateDocument,filter)
-          .then(
-            result => {
-              console.log(result," found")
-              res.send(result);
-            })
-            .catch(err=>console.log("!-> Error",err))
-
-
+        })
+      })
+      console.log("The array is",arr)
+      res.send(arr)
     })
 
+    // --------------------POST---------Students New Msg -------------------------------
+    app.post('/chat/student/:id/:tutorId',async(req,res)=>{
+      const studentId = req.params.id;
+      const tutorId = req.params.tutorId;
+      const msgObj = req.body;
+
+      const updateDocument = {
+        $push: { "chats.$[arr].chat": msgObj }
+      };
+      const filter = {
+        arrayFilters: [{  
+            "arr.tutorId" : tutorId
+          }]
+        }
+        await studentdb.updateOne({'_id':ObjectId(studentId), 'chats.tutorId':tutorId},updateDocument,filter)
+        .then(
+          result => {
+            console.log(result," found")
+            res.send(result);
+          })
+          .catch(err=>console.log("!-> Error",err))
+
+
+  })
   })
 
 

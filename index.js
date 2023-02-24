@@ -498,7 +498,29 @@ client.connect(err=>{
           })
           .catch(err=>console.log("!-> Error",err))
     })
-
+//====================Delete Tutor/Student from Admin Panel==========================
+  app.get("/Deletepost/:user/:id",async( req , res )=>{
+    const id= req.params.id;
+    const user= req.params.user;
+    console.log(id, " user -",user)
+    if(user === 'tutor'){
+      console.log("found Tutor")
+      await tutordb.findOneAndDelete({'_id':ObjectId(id)})
+      .then(
+      result => {
+        console.log(result.value)
+        res.send(result.value) })    
+      }
+      if(user === 'student'){
+        console.log("found student")
+        await studentdb.findOneAndDelete({'_id':ObjectId(id)})
+        .then(
+        result => {
+          console.log(result.value)
+          res.send(result.value) })    
+    }
+    
+  })    
 
 
   })

@@ -103,7 +103,6 @@ client.connect(err=>{
     const postId= req.params.postId;
     const queryId= req.params.studentId;
     const reviewData = req.body;
-    // const query = { "enroll.id": queryId };
     const updateDocument = {
       $set: { "enroll.$[aaa]": {...reviewData}}
     };
@@ -114,10 +113,46 @@ client.connect(err=>{
 
     }
     const postData = await postsdb.updateOne({"_id":ObjectId(postId), "enroll.id":queryId},updateDocument,filter)
-    // const result = await pizza.updateOne(query, updateDocument);
-    // const result = await postData. 
     console.log(postData);
     res.send(postData);
+  })
+  // ------------------------student Report for course--------------
+  app.post("/report/:postId/:studentId",async(req,res)=>{
+    const postId= req.params.postId;
+    const studentId= req.params.studentId;
+    const reportData = req.body;
+   
+    const postData = await postsdb.findOne({"_id":ObjectId(postId), "enroll.id":studentId})
+    if(postData?.report){
+            //------------if post and report found then-------------->
+            console.log("post.report  found and-->")
+            const updateDocument = {
+              $push: { "report": {...reportData} }
+            };
+      
+            await postsdb.updateOne({'_id':ObjectId(postId)},updateDocument)
+            .then(
+            result => {
+              console.log(result,"After Enroll Result")
+              res.send(result)
+            })
+            .catch(err=>console.log("finding related Error",err))
+    }else{
+          //----------------else post.report not found then----------->
+          console.log("post.report not found and-->")
+          const updateDocument = {
+            $set: { "report": [{...reportData}] }
+          };
+          await postsdb.updateOne({'_id':ObjectId(postId)},updateDocument)
+          .then(
+          result => {
+            console.log(result,"After Enroll Result")
+            res.send(result)
+          })
+          .catch(err=>console.log("finding related Error",err))
+    }
+    // console.log(postData);
+    // res.send(postData);
   })
 
 
@@ -187,7 +222,7 @@ client.connect(err=>{
       //------------if post and enroll found then-------------->
       console.log("post.enroll  found and-->")
       const updateDocument = {
-        $push: { "enroll": {"id":studentId, "review":"","complete":false} }
+        $push: { "enroll": {"id":studentId, "review":"","report":"","complete":false} }
       };
 
       await postsdb.updateOne({'_id':ObjectId(postId)},updateDocument)
@@ -230,9 +265,9 @@ client.connect(err => {
 
   //POST  Student Login DB--------------------------
   app.post("/login/student",  (req, res)=>{
-    const User = req.body;
-   
-    studentdb.findOne(User)
+    const user = req.body;
+    console.log("request student is ",user)
+    studentdb.findOne(user)
     .then((data)=>{
       res.send(data);
       console.log("Student login Documents ", data)

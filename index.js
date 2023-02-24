@@ -509,7 +509,11 @@ client.connect(err=>{
       .then(
       result => {
         console.log(result.value)
-        res.send(result.value) })    
+        // res.send(result.value) 
+      })    
+          await postsdb.deleteMany({"tutorId": id})
+          .then(result=> res.send(result))
+          .catch(e=> console.log(e))  
       }
       if(user === 'student'){
         console.log("found student")
